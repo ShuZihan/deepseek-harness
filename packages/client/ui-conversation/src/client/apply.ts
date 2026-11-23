@@ -50,6 +50,7 @@ import { TRAJECTORY_VIEW_ID, resolveActiveView } from './view-selection.ts'
 import { createViewPins } from './view-pins.ts'
 import { en, ja, es, fr, de, ru, pt, NS, zh, type ConversationKey } from './locales.ts'
 import { CONVERSATION_SETTINGS_NAMESPACE, type ConversationSettings } from '../submission-settings.ts'
+import { embeddedConversationHost } from './contract/embedded-host.ts'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
@@ -156,6 +157,7 @@ function concreteConversation(ctx: Context): ConversationController {
  * @param ctx - Client root context.
  */
 export function apply(ctx: Context, config: Config = Config({})): void {
+  const embedded = embeddedConversationHost()
   const sessions = ctx.sessions
   const slots = ctx.slots
   // Schemastery's field default is materialized before Cordis calls apply.
@@ -212,7 +214,8 @@ export function apply(ctx: Context, config: Config = Config({})): void {
     for (const entry of slots.entries('conversation.view')) {
       /* v8 ignore next -- list registration validates id at load. */
       if (entry.options.id === undefined) continue
-      if (!ctx.configForms.developerTools.enabled.getSnapshot() && entry.options.id === TRAJECTORY_VIEW_ID) continue
+      if (embedded?.showTrajectory !== true && !ctx.configForms.developerTools.enabled.getSnapshot()
+        && entry.options.id === TRAJECTORY_VIEW_ID) continue
       tabs.push({
         id: entry.options.id,
         label: resolveSlotLabel(entry.options.label) ?? entry.options.id,
@@ -300,7 +303,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
     }, 'ui-conversation: fixed stop reference')
   })
 
-  const inputHub = new InputHub(ctx, t)
+  const inputHub = new InputHub(ctx, t, embedded?.queuedMessages)
   const composerBlocks = new ComposerBlockRegistry()
 
   ctx.inject(['commandUi'], (scope) => {
@@ -379,7 +382,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
             }
             // The same rule as intake: only an ordinary Session stages image uploads.
             const ordinary = binding.session.getSnapshot().subagent === null
-            concreteConversation(ctx).rebindDraftFiles(nextId, attachmentIds, ordinary)
+            concreteConversation(ctx).rebindDraftFiles(nextId, attachmentIds, ordinary && embedded?.inlineImageTypes === undefined)
             if (draft.text !== '') {
               next.setDraft(draft)
               from.setDraft('')
@@ -480,6 +483,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
       if (sessionId === undefined) {
         return {
           registerFileIntake: fileIntake,
+          inlineImageTypes: embedded?.inlineImageTypes,
           keyboard: undefined,
           addFiles: undefined,
           removeAttachment: undefined,
@@ -504,6 +508,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
       const bridge = hostPathBridge()
       return {
         registerFileIntake: fileIntake,
+        inlineImageTypes: embedded?.inlineImageTypes,
         keyboard: shell,
         addFiles: (files, directories = new Set()) => {
           if (sessions.binding(sessionId) === undefined) return t('file.sessionUnavailable')
@@ -536,7 +541,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
           try {
             // The Host stages uploads for ordinary Sessions only; a subagent continuation's images travel inline.
             const ordinary = sessions.binding(sessionId)?.session.getSnapshot().subagent === null
-            const drafts = conversation.createDrafts(sessionId, uploads, ordinary)
+            const drafts = conversation.createDrafts(sessionId, uploads, ordinary && embedded?.inlineImageTypes === undefined)
             if (!shell.addFiles(references, drafts.map(draft => draft.id))) {
               conversation.releaseDraftAttachments(drafts)
               return t('attachment.dropBlocked')

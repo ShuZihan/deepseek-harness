@@ -1,7 +1,8 @@
 import type { Context } from '@deepseek-ai/cordis'
+import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
 import { useEffect, useId, useMemo, useState } from 'react'
 import type { FileAttachmentRef, ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
-import type { PropsLocale, PropsRenderFactories, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import type { InjectFace, PropsLocale, PropsRenderFactories, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import {
   IconCheckOutlineRegular, IconChevronDownOutlineRegular, IconChevronUpOutlineRegular, IconCloseOutlineRegular,
@@ -13,9 +14,14 @@ import type { QueueAction } from '@deepseek-ai/dsh-api-session-controller/types'
 import type { MessageId } from '@deepseek-ai/dsh-llm/brand'
 import type { UserTextFacts } from '../index.ts'
 import { NS } from '../locales.ts'
+import { embeddedConversationHost, mergeQueuedMessages, type HostQueuedMessage } from '../contract/embedded-host.ts'
 import css from './QueueDock.module.css'
 
 const EMPTY_QUEUE = [] as const
+const NO_HOST_QUEUE: ObservableSnapshot<readonly HostQueuedMessage[]> = {
+  getSnapshot: () => EMPTY_QUEUE,
+  subscribe: () => () => {},
+}
 const QUEUE_TEXT_FACTS: Readonly<Partial<UserTextFacts>> = {
   collapseWhitespace: true,
   trimWhitespace: true,
@@ -28,6 +34,7 @@ function textOf(content: InboxState['next-turn'][number]['content']): string | n
 
 /** Queue operations injected by the session-scoped registration. */
 export interface QueueDockInjected {
+  readonly hooks: { readonly hostQueue: ObservableSnapshot<readonly HostQueuedMessage[]> }
   updateQueue: (itemId: MessageId, action: QueueAction) => Promise<void>
   notify: (level: 'info' | 'error', text: string) => void
   /** Resolve one durable queued image into a session-scoped browser URL. */
@@ -94,7 +101,7 @@ function QueueThumb({ attachment, loadImage, label }: {
 }
 
 /** Full props of a dock entry: InputZone owner share + session standard kit + global seat + the locale seat. */
-export type QueueDockProps = PropsRuntime<'conversation.input.dock'> & QueueDockInjected & PropsLocale<'conversation'>
+export type QueueDockProps = PropsRuntime<'conversation.input.dock'> & InjectFace<QueueDockInjected> & PropsLocale<'conversation'>
   & PropsRenderFactories
 
 /**
@@ -102,16 +109,17 @@ export type QueueDockProps = PropsRuntime<'conversation.input.dock'> & QueueDock
  * collapsible count header; an empty queue renders nothing. Local queued submissions
  * show sending status and disabled actions until their Host queue rows arrive.
  */
-export function QueueDock({ useSession, useProjection, updateQueue, notify, loadImage, renderFactorySlot, t }: QueueDockProps) {
+export function QueueDock({ useSession, useProjection, useHostQueue, updateQueue, notify, loadImage, renderFactorySlot, t }: QueueDockProps) {
   const inbox = useProjection('inbox') as unknown as InboxState | undefined
+  const hostQueue = useHostQueue(rows => rows)
   const pendingSubmissions = useSession(s => s.pendingSubmissions)
   const queue = useMemo(() => {
-    const rows = inbox?.['next-turn'] ?? EMPTY_QUEUE
+    const rows = mergeQueuedMessages(inbox?.['next-turn'] ?? EMPTY_QUEUE, hostQueue)
     const inChat = new Set(pendingSubmissions.filter(item => item.placement === 'transcript').map(item => item.requestId))
     return inChat.size === 0 ? rows : rows.filter(({ source }) => (
       source.kind !== 'user' || !('rpcId' in source) || !inChat.has(source.rpcId)
     ))
-  }, [inbox, pendingSubmissions])
+  }, [inbox, hostQueue, pendingSubmissions])
   const pendingQueue = useMemo(() => {
     const admitted = new Set(queue.flatMap(({ source }) => (
       source.kind === 'user' && 'rpcId' in source ? [source.rpcId] : []
@@ -190,7 +198,7 @@ export function QueueDock({ useSession, useProjection, updateQueue, notify, load
         <ul id={listId} className={css.list} hidden={!listVisible}>
           {listVisible && queue.map((row) => {
             const attachments = queueAttachments(row.content)
-            const text = textOf(row.content)
+            const text = row.editable === false ? null : textOf(row.content)
             return (
               <li key={row.id} className={css.row}>
                 {/* Single-item strip has no count header, so the row itself carries the queue glyph. */}
@@ -394,6 +402,7 @@ export const queueDockEntry = {
   name: 'conversation-queue-dock',
   inject: ['slots', 'conversation', 'sessions', 'uiConversation'],
   apply(ctx: Context): void {
+    const hostQueue = embeddedConversationHost()?.queuedMessages
     ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({
       name: 'conversation.input.dock',
       id: 'queue',
@@ -404,7 +413,9 @@ export const queueDockEntry = {
         if (actx === undefined) throw new Error(`queue dock: session "${sessionId}" resolved no scope`)
         const conversation = actx.get('conversation')
         if (conversation === undefined) throw new Error('queue dock: conversation service unavailable')
+        const session = hostQueue === undefined ? undefined : ctx.sessions.binding(sessionId)?.session
         return {
+          hooks: { hostQueue: (session === undefined ? undefined : hostQueue?.(session)) ?? NO_HOST_QUEUE },
           updateQueue: (itemId, action) => conversation.updateQueue(itemId, action),
           notify: (level, text) => { conversation.input.for(actx).notify(level, text) },
           loadImage: attachment => ctx.uiConversation.imageUrl(sessionId, attachment),

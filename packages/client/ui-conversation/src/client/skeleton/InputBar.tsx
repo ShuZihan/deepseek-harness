@@ -51,7 +51,7 @@ export const InputBar = memo(function InputBar({
   useAccess,
   useProjection, sessionId, variant, occurrence, disabled: inert = false, blocked,
   workspacePickerOpen = false, onRequestWorkspace,
-  placeholder, accessory,
+  placeholder, accessory, inlineImageTypes,
 }: InputBarProps) {
   const input = useInput(s => s)
   const notice = useNotices(s => s)
@@ -62,7 +62,8 @@ export const InputBar = memo(function InputBar({
   // without a Session, where the bar is an inert placeholder with no keyboard, stop, or file intake.
   const promptDenied = useAccess('session/prompt') === false
   const cancelDenied = useAccess('session/cancel') === false
-  const uploadDenied = useAccess('fileUploads/upload') === false
+  const stagingDenied = useAccess('fileUploads/upload') === false
+  const uploadDenied = inlineImageTypes === undefined ? stagingDenied : promptDenied
   const stopAction = cancelDenied ? undefined : stop
   void useLexicon // hook seat stays bound by the inject compartment; text-ref decoration rides the shell's editor transforms
   const commandMenuOpen = useMenuLauncher(source => source === 'command')
@@ -248,6 +249,9 @@ export const InputBar = memo(function InputBar({
     if (uploadDenied || locked || machineBusy || (subagent !== null && !continuable)
       || addFiles === undefined || files.length === 0) return
     const rejected = ((): string | null => {
+      if (inlineImageTypes !== undefined && files.some(file => directories?.has(file) || !inlineImageTypes.includes(file.type))) {
+        return t('image.unsupportedType')
+      }
       // Child prompts support images, but not generic file receipts or the
       // Desktop path-reference fallback. Refuse mixed batches before intake.
       if (continuable && files.some(file => directories?.has(file) || !isImageMediaType(file.type))) {
@@ -272,7 +276,7 @@ export const InputBar = memo(function InputBar({
       return addFiles(files, directories)
     })()
     if (rejected !== null) showToast(rejected)
-  }, [uploadDenied, locked, machineBusy, subagent, continuable, addFiles, attachments, imageLimits, showToast, t])
+  }, [uploadDenied, locked, machineBusy, subagent, continuable, addFiles, attachments, imageLimits, inlineImageTypes, showToast, t])
 
   const canAcceptDrop = !uploadDenied && (subagent === null || continuable) && !locked && !machineBusy && addFiles !== undefined
 
@@ -520,6 +524,7 @@ export const InputBar = memo(function InputBar({
             <input
               ref={fileInputRef}
               type="file"
+              accept={inlineImageTypes?.join(',')}
               multiple
               disabled={!canAcceptDrop || subagent !== null}
               hidden

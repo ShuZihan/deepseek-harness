@@ -587,6 +587,8 @@ export type ComposerFileIntake = (target: ComposerFileIntakeTarget) => () => voi
 export interface ComposerBarInjected {
   /** Document paste routing across mounted composers. */
   registerFileIntake: ComposerFileIntake
+  /** If set, the embedding Host accepts only these inline image formats. */
+  inlineImageTypes?: readonly string[] | undefined
   keyboard: ComposerKeyboard | undefined
   /**
    * Register one picked batch; resolves to the rejection copy or null. Where

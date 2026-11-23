@@ -99,6 +99,7 @@ const INPUT_STATE: InputState = { draft: '', attachmentIds: [], draftRev: 0, pha
 
 const t: QueueDockProps['t'] = makeTranslate(zh, commonZh)
 const usePanelInfo: GlobalStandardProps['usePanelInfo'] = selector => selector({ activePanelId: null })
+const useHostQueue: QueueDockProps['useHostQueue'] = selector => selector([])
 
 function kitFor(snapshot: SessionSnapshot, injected: Partial<QueueDockInjected> = {}) {
   const renderText = createUserTextFixture()
@@ -121,6 +122,7 @@ function kitFor(snapshot: SessionSnapshot, injected: Partial<QueueDockInjected> 
     ...allowAllAccess,
     useContextMenu: contextMenuHook(),
     useProjection: (() => undefined) as never,
+    useHostQueue,
     useConversation: bindSnapshotSelector(createSnapshotStore(conversationSnapshot())),
     useChat: (() => { throw new Error('unused') }) as QueueDockProps['useChat'],
     useTrajectory: (() => { throw new Error('unused') }) as QueueDockProps['useTrajectory'],

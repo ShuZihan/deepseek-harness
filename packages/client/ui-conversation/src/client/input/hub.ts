@@ -27,6 +27,7 @@ import type { PopupDismissFace } from './facade.ts'
 import { SessionInputShell } from './facade.ts'
 import { reportMessageSubmission } from './submission-analytics.ts'
 import { readConversationDraft } from '../stores.ts'
+import { mergeQueuedMessages, type EmbeddedConversationHost } from '../contract/embedded-host.ts'
 
 /** Structural command face for per-session popup resolution. */
 interface CommandFace {
@@ -57,6 +58,7 @@ interface ConversationAttachmentFace {
 /** Session-addressed input facade registry (SessionInputResolver face + composer-layer extras). */
 export class InputHub implements SessionInputResolver {
   private readonly shells = new WeakMap<SessionBinding, SessionInputShell>()
+  private readonly inboxes = new WeakMap<SessionFace, ObservableSnapshot<InboxState | undefined>>()
 
   /**
    * @param ctx - client root context (services resolved lazily per call — boot order stays free).
@@ -65,7 +67,41 @@ export class InputHub implements SessionInputResolver {
   constructor(
     private readonly rootCtx: Context,
     private readonly t: TranslateNS<'conversation'>,
+    private readonly hostQueue?: EmbeddedConversationHost['queuedMessages'],
   ) {}
+
+  private inboxFor(session: SessionFace): ObservableSnapshot<InboxState | undefined> {
+    const native = session.projections.faceOf('inbox') as ObservableSnapshot<InboxState | undefined>
+    const existing = this.inboxes.get(session)
+    if (existing !== undefined) return existing
+    const pending = this.hostQueue?.(session)
+    if (pending === undefined) return native
+    let lastNative: InboxState | undefined
+    let lastPending: ReturnType<typeof pending.getSnapshot> | undefined
+    let current: InboxState | undefined
+    const merged = {
+      getSnapshot: () => {
+        const inbox = native.getSnapshot()
+        const waiting = pending.getSnapshot()
+        if (inbox !== lastNative || waiting !== lastPending) {
+          lastNative = inbox
+          lastPending = waiting
+          current = waiting.length === 0 ? inbox : {
+            'next-turn': mergeQueuedMessages(inbox?.['next-turn'] ?? [], waiting),
+            'next-step': inbox?.['next-step'] ?? [],
+          }
+        }
+        return current
+      },
+      subscribe: (listener: () => void) => {
+        const unsubscribeNative = native.subscribe(listener)
+        const unsubscribePending = pending.subscribe(listener)
+        return () => { unsubscribePending(); unsubscribeNative() }
+      },
+    }
+    this.inboxes.set(session, merged)
+    return merged
+  }
 
   /**
    * Resolve the facade for one session-scope ctx (SessionInputResolver face).
@@ -124,7 +160,7 @@ export class InputHub implements SessionInputResolver {
       messageSubmitted: (submission) => { reportMessageSubmission(this.rootCtx, submission) },
       inputTriggers: () => this.controller(actx),
       popup: () => this.popup(actx),
-      inbox: session.projections.faceOf('inbox') as ObservableSnapshot<InboxState | undefined>,
+      inbox: this.inboxFor(session),
       defaultSink: (text, attachmentIds, mode, signal, accept) => this.sink(session, text, attachmentIds, mode, signal, accept),
       quoteRemoveLabel: () => this.t('quote.remove'),
       quoteInsertionAllowed: () => {
@@ -220,7 +256,7 @@ export class InputHub implements SessionInputResolver {
     const session = binding.session.getSnapshot()
     const shell = this.shellFor(binding)
     const input = shell.snapshot
-    const inbox = binding.session.projections.faceOf('inbox').getSnapshot() as InboxState | undefined
+    const inbox = this.inboxFor(binding.session).getSnapshot()
     if (session.running || session.removed || session.openState !== 'open' || session.subagent !== null
       || session.pendingSubmissions.length > 0 || input.phase !== 'plain'
       || input.draft.trim() !== '' || input.attachmentIds.length > 0
@@ -293,7 +329,7 @@ export class InputHub implements SessionInputResolver {
    * @param shell - the resident shell (notice outlet).
    */
   private async steerQueue(session: SessionFace, shell: SessionInputShell): Promise<void> {
-    const inbox = session.projections.faceOf('inbox').getSnapshot() as InboxState | undefined
+    const inbox = this.inboxFor(session).getSnapshot()
     const queued = inbox?.['next-turn'] ?? []
     if (queued.length === 0) return
     for (const item of queued) {

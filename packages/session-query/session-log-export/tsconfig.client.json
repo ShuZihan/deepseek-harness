@@ -8,6 +8,7 @@
   "files": [
     "src/client/CopyToast.tsx",
     "src/client/Dialog.tsx",
+    "src/client/HeaderAction.tsx",
     "src/client/controller.ts",
     "src/client/copy-controller.ts",
     "src/client/index.ts",

@@ -14,6 +14,7 @@ import { SessionLogDownloadController } from './controller.ts'
 import { SessionMarkdownCopyController } from './copy-controller.ts'
 import { SessionMarkdownCopyToast, type SessionMarkdownCopyToastInjected } from './CopyToast.tsx'
 import { SessionLogDownloadDialog, type SessionLogDownloadDialogInjected } from './Dialog.tsx'
+import { SessionLogDownloadHeaderAction, type HeaderActionInjected } from './HeaderAction.tsx'
 import { en, ja, es, fr, de, ru, pt, NS, zh, type SessionLogDownloadKey } from './locales.ts'
 
 declare module '@deepseek-ai/cordis' {
@@ -32,13 +33,22 @@ export type { SessionLogDownloadEntry, SessionLogDownloadState } from './control
 
 export const inject = ['slots', 'locale', 'contextMenus']
 
+interface EmbeddedSessionExport {
+  readonly resolveUrl: (sessionId: SessionId) => string
+  readonly filename?: (sessionId: SessionId) => string
+  readonly headerLabel?: string
+  readonly copyMarkdown?: boolean
+}
+
 /**
  * Provide the download controller and mount its modal, the Markdown copy
  * controller and its root toast, and the shared Session menu actions.
  * @param ctx - browser context carrying slots and locale services.
  */
 export function apply(ctx: ClientContext): void {
-  const controller = new SessionLogDownloadController()
+  const embedded = (globalThis as { __DSH_EMBEDDED_SESSION_EXPORT__?: EmbeddedSessionExport })
+    .__DSH_EMBEDDED_SESSION_EXPORT__
+  const controller = new SessionLogDownloadController(undefined, undefined, embedded?.resolveUrl, embedded?.filename)
   const copyController = new SessionMarkdownCopyController()
   ctx.provide('sessionLogDownload', controller)
   ctx.effect(() => async () => { await controller.dispose() }, 'session-log-download: browser download lifecycle')
@@ -63,13 +73,30 @@ export function apply(ctx: ClientContext): void {
     id: 'session-log-download.export', target: 'sessionHeader', order: 100,
     observe: () => [controller.store, copyController.store, ctx.locale],
     resolve: ({ sessionId }) => [
-      { id: 'copy', label: t('menu.copyMarkdown'), icon: { key: 'session-log-download.copy' },
-        disabled: copyController.store.getSnapshot().copying, run: () => copyController.copy(sessionId) },
-      { id: 'download', label: t('menu.download'), icon: { key: 'session-log-download.download' },
+      ...(embedded?.copyMarkdown === false ? [] : [{
+        id: 'copy', label: t('menu.copyMarkdown'), icon: { key: 'session-log-download.copy' },
+        disabled: copyController.store.getSnapshot().copying, run: () => copyController.copy(sessionId),
+      }]),
+      ...(embedded?.headerLabel !== undefined ? [] : [{
+        id: 'download', label: t('menu.download'), icon: { key: 'session-log-download.download' },
         disabled: controller.store.getSnapshot().bySession[sessionId]?.status === 'downloading',
-        run: () => controller.download(sessionId) },
+        run: () => controller.download(sessionId),
+      }]),
     ],
   }), 'session-log-download: Header exports')
+  const headerLabel = embedded?.headerLabel
+  if (headerLabel !== undefined) {
+    ctx.slots.inject('conversation.session.header.utilities', () => ctx.slots.register({
+      name: 'conversation.session.header.utilities',
+      id: 'session-log-download',
+      locale: NS,
+      inject: (): HeaderActionInjected => ({
+        label: headerLabel,
+        hooks: { downloadState: controller.store },
+        download: sessionId => controller.download(sessionId),
+      }),
+    }, SessionLogDownloadHeaderAction))
+  }
   ctx.effect(() => ctx.contextMenus.register({
     id: 'session-log-download.feedback', target: 'sessionHeader', order: 600,
     observe: () => [feedbackAvailable, ctx.locale],

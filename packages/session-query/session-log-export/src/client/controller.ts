@@ -25,6 +25,10 @@ export interface SessionLogDownloadState {
 type Fetch = (input: string | URL, init?: RequestInit) => Promise<Response>
 type Save = (url: string, filename: string) => void
 
+function sessionLogRoute(sessionId: SessionId): string {
+  return `${SESSION_LOG_EXPORT_ROUTE}?${new URLSearchParams({ sessionId, includeDescendants: 'true' }).toString()}`
+}
+
 const INITIAL: SessionLogDownloadState = { bySession: {} }
 
 /**
@@ -65,10 +69,14 @@ export class SessionLogDownloadController {
   /**
    * @param fetcher - HTTP carrier used to read the host-streamed ZIP.
    * @param save - browser save operation.
+   * @param resolveUrl - browser-carrier override of the archive route.
+   * @param filename - browser-carrier override of the suggested name.
    */
   constructor(
     private readonly fetcher: Fetch = (input, init) => fetch(input, init),
     private readonly save: Save = downloadUrl,
+    private readonly resolveUrl = sessionLogRoute,
+    private readonly filename = sessionLogZipFilename,
   ) {}
 
   /**
@@ -113,15 +121,14 @@ export class SessionLogDownloadController {
   private async run(sessionId: SessionId, signal: AbortSignal, order: number): Promise<void> {
     this.publish(sessionId, { order, open: true, status: 'downloading', error: null })
     try {
-      const query = new URLSearchParams({ sessionId, includeDescendants: 'true' })
-      const route = `${SESSION_LOG_EXPORT_ROUTE}?${query.toString()}`
+      const route = this.resolveUrl(sessionId)
       const response = await this.fetcher(route, { method: 'HEAD', signal })
       if (!response.ok) {
         const detail = await response.text().catch(() => '')
         throw new Error(`Export failed: HTTP ${response.status}${detail === '' ? '' : ` ${detail}`}`)
       }
       if (signal.aborted) return
-      this.save(route, sessionLogZipFilename(sessionId))
+      this.save(route, this.filename(sessionId))
       const open = this.store.getSnapshot().bySession[String(sessionId)]?.open ?? true
       this.publish(sessionId, { order, open, status: 'success', error: null })
     } catch (error: unknown) {
