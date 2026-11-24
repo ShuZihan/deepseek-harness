@@ -343,6 +343,7 @@ function SidebarPanel(panel: PanelProps & { width: number; panelRef: RefObject<H
         '--dsh-sidebar-width': fullscreen ? '100vw' : `${width}px` } as CSSProperties}
       data-sidebar-right-session={sessionId}
       data-sidebar-right-panel={fullscreen ? 'fullscreen' : 'push'}
+      data-sidebar-right-auto-fullscreen={panel.autoFullscreen || undefined}
       data-sidebar-right-open={expanded || undefined}
       data-sidebar-right-opening={opening || undefined}
       onTransitionEnd={opening ? () => { setOpening(false) } : undefined}
