@@ -7,6 +7,8 @@ export type HostQueuedMessage = InboxState['next-turn'][number] & { readonly edi
 
 /** Browser carrier options for the embedded conversation surface. */
 export interface EmbeddedConversationHost {
+  /** Localized welcome headline supplied by the embedding application. */
+  readonly welcomeTitle?: string
   readonly showTrajectory?: boolean
   readonly inlineImageTypes?: readonly string[]
   readonly queuedMessages?: (session: SessionFace) => ObservableSnapshot<readonly HostQueuedMessage[]> | undefined

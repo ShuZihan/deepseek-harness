@@ -37,6 +37,7 @@ interface EmbeddedSessionExport {
   readonly resolveUrl: (sessionId: SessionId) => string
   readonly filename?: (sessionId: SessionId) => string
   readonly headerLabel?: string
+  readonly showHeaderAction?: boolean
   readonly copyMarkdown?: boolean
 }
 
@@ -85,7 +86,7 @@ export function apply(ctx: ClientContext): void {
     ],
   }), 'session-log-download: Header exports')
   const headerLabel = embedded?.headerLabel
-  if (headerLabel !== undefined) {
+  if (headerLabel !== undefined && embedded?.showHeaderAction !== false) {
     ctx.slots.inject('conversation.session.header.utilities', () => ctx.slots.register({
       name: 'conversation.session.header.utilities',
       id: 'session-log-download',

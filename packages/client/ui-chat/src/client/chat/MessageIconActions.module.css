@@ -74,6 +74,10 @@
   cursor: pointer;
 }
 
+:global(html[data-dsh-embedded]) .copy {
+  display: none;
+}
+
 /* Action glyphs follow the same px delta as the text they serve; the
    assistant completion row gives them two extra pixels. */
 .action svg {

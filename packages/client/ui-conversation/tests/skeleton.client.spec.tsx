@@ -422,6 +422,12 @@ function mount(
 }
 
 describe('Hero chrome', () => {
+  it('renders the welcome headline supplied by the embedding application', () => {
+    const view = render(<HeroShell t={makeTranslate(en, commonEn)} title="Project Assistant" renderSlot={() => null} />)
+    expect(view.getByText('Project Assistant')).toBeTruthy()
+    expect(view.queryByText('Into the Unknown')).toBeNull()
+  })
+
   it('renders the English preview badge through the hero locale seat', () => {
     const renderSlot = vi.fn<(key: string, owner: object, opts?: { fallback?: ReactNode }) => ReactNode>(() => null)
     const view = render(<HeroShell t={makeTranslate(en, commonEn)} renderSlot={renderSlot as never} />)

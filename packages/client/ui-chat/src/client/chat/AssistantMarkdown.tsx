@@ -75,6 +75,7 @@ export const AssistantMarkdown = memo(function AssistantMarkdown({
     || blocks.some(block => block.kind !== 'tool-call')
   if (!hasVisible) return null
   const rendered: ReactNode[] = []
+  let hasMarkdown = false
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i]
     if (block === undefined) continue
@@ -82,6 +83,7 @@ export const AssistantMarkdown = memo(function AssistantMarkdown({
     if (groupPart === 'response' && block.kind === 'reasoning') continue
     switch (block.kind) {
       case 'text':
+        hasMarkdown = true
         rendered.push(
           <MarkdownText
             key={i}
@@ -147,7 +149,7 @@ export const AssistantMarkdown = memo(function AssistantMarkdown({
   }
   return (
     <div className={css.root} data-streaming={streaming || undefined}>
-      <div className={css.body}>
+      <div className={css.body} data-assistant-markdown={hasMarkdown || undefined}>
         {rendered}
         {interrupted && (groupPart === undefined || groupPart === 'response'
           || !blocks.some(block => block.kind !== 'reasoning' && block.kind !== 'tool-call'))

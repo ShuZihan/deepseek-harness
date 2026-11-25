@@ -158,6 +158,8 @@ function concreteConversation(ctx: Context): ConversationController {
  */
 export function apply(ctx: Context, config: Config = Config({})): void {
   const embedded = embeddedConversationHost()
+  const embeddedAppearance = typeof document !== 'undefined'
+    && document.documentElement.hasAttribute('data-dsh-embedded')
   const sessions = ctx.sessions
   const slots = ctx.slots
   // Schemastery's field default is materialized before Cordis calls apply.
@@ -364,6 +366,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
       widthControls: { scope: 'root' },
     },
     inject: (sessionId: SessionId | undefined): ConversationInjected => ({
+      welcomeTitle: embedded?.welcomeTitle,
       hooks: {
         composerBlock: sessionId === undefined ? ABSENT_BLOCK : composerBlocks.storeFor(sessionId),
       },
@@ -482,6 +485,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
     inject: (sessionId: SessionId | undefined): ComposerBarInjected => {
       if (sessionId === undefined) {
         return {
+          embeddedAppearance,
           registerFileIntake: fileIntake,
           inlineImageTypes: embedded?.inlineImageTypes,
           keyboard: undefined,
@@ -507,6 +511,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
       const inputTriggers = inputHub.inputTriggers(sessionId)
       const bridge = hostPathBridge()
       return {
+        embeddedAppearance,
         registerFileIntake: fileIntake,
         inlineImageTypes: embedded?.inlineImageTypes,
         keyboard: shell,

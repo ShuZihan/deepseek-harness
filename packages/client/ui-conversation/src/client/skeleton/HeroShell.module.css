@@ -129,6 +129,18 @@
   overflow: visible;
 }
 
+:global(html[data-dsh-embedded]) .headline :is(.fishHitbox, .previewBadge) {
+  display: none;
+}
+
+:global(html[data-dsh-embedded]) .titleGroup {
+  color: var(--copilot-text);
+  font-family: var(--dsw-font-family);
+  font-size: calc(var(--dsh-content-font-size, 14px) + 10px);
+  font-weight: 600;
+  text-align: center;
+}
+
 .body > * {
   position: relative;
   z-index: 1;

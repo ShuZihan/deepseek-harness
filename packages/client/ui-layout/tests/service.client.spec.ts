@@ -17,6 +17,15 @@ function fakePanels(): PanelActions {
 }
 
 describe('LayoutController', () => {
+  it('leaves host-owned sidebar navigation unchanged', () => {
+    const panels = fakePanels()
+    const service = new LayoutController(panels, () => true, createSnapshotStore({ activePanelId: null }), false)
+
+    service.toggleSidebar()
+
+    expect(panels.toggleSidebar).not.toHaveBeenCalled()
+  })
+
   it('forwards right column transitions to the constructor-supplied actions', () => {
     const panels = fakePanels()
     const service = new LayoutController(panels, () => true, createSnapshotStore({ activePanelId: null }))

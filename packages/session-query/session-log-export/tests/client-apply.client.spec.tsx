@@ -113,6 +113,24 @@ describe('session-log-download browser plugin', () => {
     expect(b.slots.entries('shell.overlay')).toHaveLength(0)
   })
 
+  it('hides embedded download entry points while retaining the host export URL', async () => {
+    const exportUrl = `/workspace-chat/native/${SID}/export`
+    const fetcher = vi.fn(async () => new Response('', { status: 500 }))
+    vi.stubGlobal('fetch', fetcher)
+    vi.stubGlobal('__DSH_EMBEDDED_SESSION_EXPORT__', {
+      resolveUrl: () => exportUrl,
+      headerLabel: 'Session log',
+      showHeaderAction: false,
+      copyMarkdown: false,
+    })
+    const b = await bench()
+
+    expect(b.slots.entries('conversation.session.header.utilities')).toHaveLength(0)
+    expect(b.menu().source.getSnapshot()).toEqual([])
+    await b.ctx.sessionLogDownload.download(SID)
+    expect(fetcher).toHaveBeenCalledWith(exportUrl, expect.anything())
+  })
+
   it('updates only occupied export rows and keeps feedback available during downloads and copy', async () => {
     const download = Promise.withResolvers<Response>(), copy = Promise.withResolvers<Response>()
     const fetcher = vi.fn((input: string | URL) => String(input).includes('session.markdown') ? copy.promise : download.promise)

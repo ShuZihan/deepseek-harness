@@ -23,6 +23,11 @@
   --dsw-radius-panel: 28px;
 }
 
+html[data-dsh-embedded] {
+  --dsw-radius-embedded-composer: 9px;
+  --dsw-radius-embedded-control: 6px;
+}
+
 /* User font lists (--dsh-font-family-text/-code, written on body by the theme
  * boot script and ThemePresenter) lead the built-in stacks. An unset list
  * falls back to the built-in stack itself; the repeated families are inert. */

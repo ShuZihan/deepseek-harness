@@ -76,6 +76,8 @@ The shared image slot props keep display choices separate from durable reference
 
 The composer uses a minimum 16px draft font on coarse-pointer devices to avoid focus-triggered browser zoom; larger font preferences still apply.
 
+An embedding application can set `data-dsh-embedded` on the document element before boot to use the compact composer and hide the standalone workspace selector and decorative welcome mark. It can publish a localized `welcomeTitle` in `globalThis.__DSH_CONVERSATION_HOST__` before boot. The native composer keeps its standard submission and keyboard behavior.
+
 The composer measures its expanded control groups after size, content, visibility, or font-loading changes. If they cannot share a line, the row sets `--dsh-composer-model-text-display: none` and `--dsh-composer-model-icon-display: block` for the model seat; their defaults are `block` and `none`. The model seat is measured at its content width, capped at 360px, rather than at a share of the row, so a long name stays visible in the measurement. Wrapping remains available if even the icon cannot fit.
 
 The context meter follows the [statistics-control radius](../../../docs/ui-radius.md#radius-scale).

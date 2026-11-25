@@ -74,6 +74,24 @@
   overflow: hidden;
 }
 
+:global(html[data-dsh-embedded]) .frame {
+  grid-template-columns: 0 minmax(0, 1fr) 0;
+}
+
+:global(html[data-dsh-embedded]) .centerCol {
+  box-sizing: border-box;
+  padding-block-start: var(--dsh-embedded-toolbar-height);
+}
+
+:global(html[data-dsh-embedded]) .frame > :is(.sidebarCol, .handle, .drawerMask, .leadingSeat) {
+  display: none;
+}
+
+/* In fullscreen the Files strip takes the toolbar's place. */
+:global(html[data-dsh-embedded]:has([data-sidebar-right-panel='fullscreen'][data-sidebar-right-open]:not([hidden] *)) [data-dsh-embedded-toolbar]) {
+  visibility: hidden;
+}
+
 .mainPanel {
   display: flex;
   flex-direction: column;

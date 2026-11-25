@@ -15,6 +15,10 @@
   visibility: hidden;
 }
 
+:global(html[data-dsh-embedded]) .button {
+  display: none;
+}
+
 /* The left sidebar's panel icon, mirrored: the divider moves to the right side. */
 .icon {
   transform: scaleX(-1);

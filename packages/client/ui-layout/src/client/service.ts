@@ -39,7 +39,7 @@ export interface ILayout {
    * @returns a signal aborted by the next navigation or layout disposal; check it before committing UI state.
    */
   beginNavigation(): AbortSignal
-  /** Toggle the sidebar panel (closed ⟷ contract default width). */
+  /** Toggle the sidebar panel when the client owns left navigation. */
   toggleSidebar(): void
   /**
    * Report the right panel's presentation without changing its expanded state.
@@ -61,11 +61,13 @@ export class LayoutController implements ILayout {
    * @param panels - actions of the instance shared with the root entry.
    * @param hasMainPanel - checks the live main-slot registry for a panel id.
    * @param panelInfo - root store's shared central-panel selection source.
+   * @param sidebarEnabled - whether the client owns left navigation.
    */
   constructor(
     private readonly panels: PanelActions,
     private readonly hasMainPanel: (id: MainPanelId) => boolean,
     readonly panelInfo: HostObservable<PanelInfo>,
+    private readonly sidebarEnabled = true,
   ) {}
 
   /** Select a global panel or return to the Conversation. */
@@ -89,9 +91,9 @@ export class LayoutController implements ILayout {
     this.navigation.abort()
   }
 
-  /** Toggle the sidebar panel (closed ⟷ contract default width). */
+  /** Toggle the sidebar panel when the client owns left navigation. */
   toggleSidebar(): void {
-    this.panels.toggleSidebar()
+    if (this.sidebarEnabled) this.panels.toggleSidebar()
   }
 
   /** Report the right panel's track and fullscreen presentation. */

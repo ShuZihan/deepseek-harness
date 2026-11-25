@@ -19,6 +19,17 @@
      conversation column, where the axis variable is absent. */
   max-width: min(calc(var(--dsh-chat-content-width, 748px) * 0.702), 82%);
 }
+
+:global(html[data-dsh-embedded]) .userBubble {
+  box-sizing: border-box;
+  padding: 10px 13px;
+  border: 1px solid var(--copilot-user-line);
+  border-radius: var(--dsw-radius-md);
+  background: var(--copilot-user-bg);
+  color: var(--copilot-user-text);
+  line-height: 1.5;
+}
+
 .referenceSummary {
   color: var(--dsw-alias-label-tertiary);
   font-size: var(--dsh-content-font-size-secondary, 13px);

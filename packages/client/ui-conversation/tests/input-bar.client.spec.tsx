@@ -97,6 +97,7 @@ interface BenchOptions {
   steerQueue?: () => void
   variant?: 'hero' | 'composer'
   occurrence?: 'main' | 'embedded'
+  embeddedAppearance?: boolean
   registerFileIntake?: ComposerFileIntake
   placeholder?: string
   t?: InputBarProps['t']
@@ -235,6 +236,7 @@ function bench(over?: BenchOptions) {
     renderSlot,
     variant: over?.variant ?? 'composer',
     occurrence: over?.occurrence ?? 'main',
+    embeddedAppearance: over?.embeddedAppearance ?? false,
     ...(over?.inert === true ? { disabled: true } : {}),
     ...(over?.blocked !== undefined ? { blocked: over.blocked } : {}),
     ...(over?.workspacePickerOpen !== undefined ? { workspacePickerOpen: over.workspacePickerOpen } : {}),
@@ -1106,6 +1108,16 @@ describe('Enter semantics', () => {
 })
 
 describe('running and lock semantics', () => {
+  it('uses the embedded send glyph only while the primary action sends a draft', () => {
+    const { button, shell } = bench({ running: true, embeddedAppearance: true })
+    expect(button.getAttribute('aria-label')).toBe('停止生成')
+    expect(button.querySelector('[data-composer-send-glyph]')).toBeNull()
+
+    writeDraft(shell, '排队消息')
+    expect(button.getAttribute('aria-label')).toBe('排队发送')
+    expect(button.querySelector('[data-composer-send-glyph]')).not.toBeNull()
+  })
+
   it.each([
     { messages: zh, label: '停止生成', trigger: 'hover' },
     { messages: en, label: 'Stop generating', trigger: 'focus' },

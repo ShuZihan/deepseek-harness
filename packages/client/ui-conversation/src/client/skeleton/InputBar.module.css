@@ -470,3 +470,89 @@
 .activity { display: flex; align-items: center; flex: none; }
 .activity:empty { display: none; }
 .activityExpanded { flex: 1; min-width: 0; }
+
+/* A two-line text field over a compact tool row matches the main Chat composer. */
+:global(html[data-dsh-embedded]) :global(#root) .card {
+  gap: 6px;
+  padding: 8px 0 0;
+  border: 1px solid var(--copilot-line-strong);
+  border-radius: var(--dsw-radius-embedded-composer);
+  background: var(--copilot-panel);
+  box-shadow: none;
+  font-family: var(--dsw-font-family);
+  font-size: var(--dsh-content-font-size);
+  line-height: 1.5;
+}
+
+:global(html[data-dsh-embedded]) :global(#root) .card::after {
+  display: none;
+}
+
+:global(html[data-dsh-embedded]) :global(#root) .card .input {
+  min-height: calc(3em + 8px);
+  padding: 4px 12px;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  background: transparent;
+  font: inherit;
+  color: var(--copilot-text);
+}
+
+:global(html[data-dsh-embedded]) :global(#root) .placeholder {
+  inset: 4px 12px auto;
+  color: var(--copilot-muted);
+  font: inherit;
+}
+
+:global(html[data-dsh-embedded]) :global(#root) .card > .row {
+  gap: 6px;
+  padding: 0 8px 8px;
+}
+
+:global(html[data-dsh-embedded]) :global(#root) .card .tools,
+:global(html[data-dsh-embedded]) :global(#root) .card .trailing,
+:global(html[data-dsh-embedded]) :global(#root) .card .modes {
+  gap: 5px;
+}
+
+:global(html[data-dsh-embedded]) :global(#root) .card button.add,
+:global(html[data-dsh-embedded]) :global(#root) .card .trailing button:not(.primary) {
+  min-height: 28px;
+  border: 0;
+  border-radius: var(--dsw-radius-embedded-control);
+  background: transparent;
+  box-shadow: none;
+  color: var(--copilot-text);
+  font-family: inherit;
+  font-size: max(12px, calc(var(--dsh-content-font-size) - 1px));
+}
+
+:global(html[data-dsh-embedded]) :global(#root) .card button.primary {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--dsw-radius-embedded-control);
+  background: var(--copilot-send-bg);
+  box-shadow: none;
+  color: var(--copilot-send-text);
+  transform: none;
+}
+
+.embeddedSendGlyph {
+  width: 20px;
+  height: 20px;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20.9 2.7a.9.9 0 0 1 1.1 1.1l-5.7 17.1a.9.9 0 0 1-1.7.1l-3.1-7-7-3.1a.9.9 0 0 1 .1-1.7l16.3-6.5ZM8 10.2l4.2 1.9 5.5-5.3L8 10.2Zm5.3 3 1.9 4.2 3.4-9.7-5.3 5.5Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+@media (hover: hover) {
+  :global(html[data-dsh-embedded]) :global(#root) .card button.add:hover:not(:disabled),
+  :global(html[data-dsh-embedded]) :global(#root) .card .trailing button:not(.primary):hover:not(:disabled) {
+    background: var(--copilot-hover);
+  }
+
+  :global(html[data-dsh-embedded]) :global(#root) .card button.primary:hover:not(:disabled) {
+    background: var(--copilot-send-hover);
+  }
+}

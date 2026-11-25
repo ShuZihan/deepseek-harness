@@ -63,7 +63,7 @@ function resize(width: number): void {
   })
 }
 
-function mountFrame(windowWidth = frameWidth, content?: AppFrameProps['renderSlot']) {
+function mountFrame(windowWidth = frameWidth, content?: AppFrameProps['renderSlot'], embedded = false) {
   vi.stubGlobal('innerWidth', windowWidth)
   const instance = createLayoutStore().create()
   const slotCalls: { key: string; props: object; options: RenderOpts | undefined }[] = []
@@ -93,6 +93,7 @@ function mountFrame(windowWidth = frameWidth, content?: AppFrameProps['renderSlo
   })
   const element = () => (
     <AppFrame
+      embedded={embedded}
       useStore={useStore}
       actions={instance.actions}
       renderSlot={renderSlot}
@@ -190,6 +191,12 @@ afterEach(() => {
 })
 
 describe('AppFrame', () => {
+  it('marks the mounted column for an embedded host and leaves tracks to its stylesheet', () => {
+    const { frame } = mountFrame(frameWidth, undefined, true)
+    expect(frame.querySelector('[data-dsh-embedded-ready] [data-testid="main-content"]')).not.toBeNull()
+    expect(frame.style.gridTemplateColumns).toBe('')
+  })
+
   it('localizes the product title without a configured build title', () => {
     mountFrame()
     expect(document.title).toBe('DSH Local Build')

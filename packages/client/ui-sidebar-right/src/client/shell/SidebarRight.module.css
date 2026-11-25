@@ -83,6 +83,14 @@
   --dsh-dockkit-dock-layer: 40;
 }
 
+:global(html[data-dsh-embedded]) .panel[data-sidebar-right-panel='push'] {
+  inset-block-start: var(--dsh-embedded-toolbar-height);
+}
+
+:global(html[data-dsh-embedded]) .panel[data-sidebar-right-auto-fullscreen] :global([data-sidebar-right-mode='push']) {
+  display: none;
+}
+
 /* Dockkit owns its pane exclusions and marked strip rows. Electron composes
    their boxes in DOM order: a pane subtracts its box, then a marked strip adds
    its row back. ui-web excludes controls within that row and body portals;

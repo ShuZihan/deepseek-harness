@@ -21,6 +21,15 @@
   gap: var(--dsh-assistant-block-gap);
 }
 
+:global(html[data-dsh-embedded] [data-chat-flow-kind='assistant-step']) .body[data-assistant-markdown] {
+  padding: 10px 13px;
+  border: 1px solid var(--copilot-line);
+  border-radius: var(--dsw-radius-md);
+  background: var(--copilot-menu);
+  color: var(--copilot-text);
+  line-height: 1.5;
+}
+
 /* A step-group reasoning part (its Chat seat carries data-chat-group-part)
    holds only reasoning rows, which are process rows: they sit 4px apart, like
    rows of different steps. */

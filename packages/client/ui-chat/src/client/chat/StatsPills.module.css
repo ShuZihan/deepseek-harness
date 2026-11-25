@@ -10,6 +10,10 @@
   line-height: calc(20px + var(--dsh-content-font-delta-secondary, 0px));
 }
 
+:global(html[data-dsh-embedded]) .anchor {
+  display: none;
+}
+
 .pill {
   display: inline-flex;
   align-items: center;

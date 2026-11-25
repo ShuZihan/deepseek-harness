@@ -25,6 +25,8 @@ const scrollbarCss = read('scrollbar.css')
 
 /** Body attribute selecting the dark palette; ui-layout's ThemePresenter sets it. */
 const DARK_ATTRIBUTE = '[data-ds-dark-theme]'
+/** The embedding application's palette does not redefine the default ladder. */
+const EMBEDDED_ATTRIBUTE = '[data-dsh-embedded]'
 /** Alias tokens under test: the prefix the elevation pairs share. */
 const TOKEN_PREFIX = '--dsw-alias-scrollbar-'
 /** Prefix of the rebindable indirection scrollbar.css owns. */
@@ -160,6 +162,7 @@ const TRANSLUCENT_ELEVATED_SURFACES = new Set(['--dsw-specific-menu'])
 function elevatedRungs(): Set<string> {
   const definitions = new Map<string, string>()
   for (const rule of platformRules) {
+    if (rule.selectors.every(selector => selector.includes(EMBEDDED_ATTRIBUTE))) continue
     // Dark declarations come later in the sheet and overwrite the light ones,
     // which is the palette this distinction exists in.
     for (const [property, value] of rule.declarations) definitions.set(property, value)
@@ -496,6 +499,14 @@ describe('elevated surface rebinds', () => {
     // the check would say nothing.
     expect(elevatedSurfaces).not.toContain('--dsw-alias-bg-base')
     expect(elevatedSurfaces).not.toContain('--dsw-alias-bg-layer-1')
+  })
+
+  it('keeps scrollbar pairs on the native palette when an embedded host overrides surface colors', () => {
+    const embeddedDeclarations = platformRules
+      .filter(rule => rule.selectors.some(selector => selector.includes(EMBEDDED_ATTRIBUTE)))
+      .flatMap(rule => rule.declarations)
+    expect(embeddedDeclarations.some(([name]) => name === '--dsw-specific-input-major')).toBe(true)
+    expect(embeddedDeclarations.filter(([name]) => name.startsWith(TOKEN_PREFIX))).toEqual([])
   })
 
   it('every sheet that scrolls on an elevated surface rebinds', () => {

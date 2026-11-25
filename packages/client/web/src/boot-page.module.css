@@ -1,5 +1,16 @@
 /* The framework-free boot page cannot depend on theme delivery succeeding. */
 
+:global(html[data-dsh-embedded]) {
+  --dsh-embedded-toolbar-height: 40px;
+}
+
+:global(html[data-dsh-embedded] [data-dsh-embedded-toolbar]) {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  pointer-events: none;
+}
+
 .boot {
   --dsh-boot-label-primary: #0f1115;
   --dsh-boot-label-secondary: #61666b;
@@ -101,4 +112,8 @@
   line-height: 18px;
   color: var(--dsw-alias-label-secondary, var(--dsh-boot-label-secondary));
   white-space: pre-wrap;
+}
+
+:global(html[data-dsh-embedded]) .boot :is(.wordmark, .failedItem) {
+  display: none;
 }

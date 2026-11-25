@@ -468,6 +468,8 @@ export type ConvViewProps = PropsRuntime<'conversation.view'>
 
 /** Business callbacks injected into the resident Conversation shell. */
 export interface ConversationInjected {
+  /** Localized welcome headline supplied by the embedding application. */
+  welcomeTitle?: string | undefined
   /** Connect and open a blank Session in the selected Workspace. */
   selectWorkspace: (workspaceId: WorkspaceId) => Promise<void>
   /** Session-addressed composer block source, or the stable absent source. */
@@ -585,6 +587,8 @@ export type ComposerFileIntake = (target: ComposerFileIntakeTarget) => () => voi
 
 /** Package-private operations injected into the resident composer bar. */
 export interface ComposerBarInjected {
+  /** Whether the browser shell uses the embedded appearance. */
+  embeddedAppearance?: boolean
   /** Document paste routing across mounted composers. */
   registerFileIntake: ComposerFileIntake
   /** If set, the embedding Host accepts only these inline image formats. */

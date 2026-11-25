@@ -26,6 +26,8 @@ import css from './AppFrame.module.css'
 
 /** Browser posture supplied by the root registration. */
 export interface AppFrameInjected {
+  /** An embedded host supplies its own navigation and toolbar. */
+  embedded: boolean
   hooks: { foldedLandscape: HostObservable<boolean> }
 }
 
@@ -38,8 +40,9 @@ export type AppFrameProps =
   & InjectFace<AppFrameInjected>
 
 /** Center column grid item (session-body building block). */
-function CenterColumn(props: { children?: ReactNode; inert: boolean }) {
-  return <div className={css.centerCol} {...{ inert: props.inert ? '' : undefined }}>{props.children}</div>
+function CenterColumn(props: { children?: ReactNode; inert: boolean; embedded: boolean }) {
+  return <div className={css.centerCol} data-dsh-embedded-ready={props.embedded || undefined}
+    {...{ inert: props.inert ? '' : undefined }}>{props.children}</div>
 }
 
 /** Subscribe to the main key without subscribing the column frame to each panel id. */
@@ -131,6 +134,7 @@ export function AppFrame({
   useSessions,
   usePanelInfo,
   useFoldedLandscape,
+  embedded,
   actions,
   renderSlot,
   t,
@@ -292,8 +296,8 @@ export function AppFrame({
       style={{
         ...(windowsTitlebar
           ? { '--dsh-windows-sidebar-width': `${cols.sidebar}px` } : {}),
-        gridTemplateColumns:
-          `${cols.sidebar}px minmax(${cols.rightbar === 0 ? 0 : CENTER_MIN}px, 1fr) minmax(0px, ${rightbarMax}px)`,
+        gridTemplateColumns: embedded ? undefined
+          : `${cols.sidebar}px minmax(${cols.rightbar === 0 ? 0 : CENTER_MIN}px, 1fr) minmax(0px, ${rightbarMax}px)`,
       }}
       data-sidebar-collapsed={sidebarCollapsed || undefined}
       data-sidebar-drawer={drawer || undefined}
@@ -317,7 +321,7 @@ export function AppFrame({
         {sidebar}
       </div>
       <>
-        <CenterColumn inert={drawerOpen}>{main}</CenterColumn>
+        <CenterColumn embedded={embedded} inert={drawerOpen}>{main}</CenterColumn>
         <RightbarColumn inert={drawerOpen}>
           {renderSlot('rightbar', { width: normal.rightbar, viewportWidth: viewport, canShow: normal.rightbar > 0 })}
         </RightbarColumn>

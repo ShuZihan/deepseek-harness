@@ -509,3 +509,61 @@ html[data-platform='darwin'] body[data-ds-dark-theme] {
   --dsw-specific-sidebar-wash-bottom: rgb(143 137 184 / 0.07);
   --dsw-specific-sidebar-wash-top: rgb(122 155 240 / 0.08);
 }
+
+/* The iframe receives the same palette and type scale as Workspace Chat. */
+html[data-dsh-embedded] body {
+  --copilot-bg: var(--omnix-chat-bg, #f6f8fb);
+  --copilot-panel: var(--omnix-chat-panel, #fff);
+  --copilot-text: var(--omnix-chat-text, #17283b);
+  --copilot-muted: var(--omnix-chat-muted, #516174);
+  --copilot-line: var(--omnix-chat-line, #dbe4ef);
+  --copilot-line-strong: var(--omnix-chat-line-strong, #c5d2e1);
+  --copilot-accent: var(--omnix-chat-accent, #2563eb);
+  --copilot-hover: var(--omnix-chat-hover, #eef5ff);
+  --copilot-menu: var(--omnix-chat-menu-bg, #fff);
+  --copilot-user-bg: #dfedff;
+  --copilot-user-line: #bfdaff;
+  --copilot-user-text: #123155;
+  --copilot-send-bg: #1765d1;
+  --copilot-send-hover: #1256b6;
+  --copilot-send-text: #fff;
+}
+
+html[data-dsh-embedded] body[data-ds-dark-theme] {
+  --copilot-bg: var(--omnix-chat-bg, #191919);
+  --copilot-panel: var(--omnix-chat-panel, #202020);
+  --copilot-text: var(--omnix-chat-text, #e8edf5);
+  --copilot-muted: var(--omnix-chat-muted, #a4b1c3);
+  --copilot-line: var(--omnix-chat-line, #384556);
+  --copilot-line-strong: var(--omnix-chat-line-strong, #52647c);
+  --copilot-accent: var(--omnix-chat-accent, #8db9ff);
+  --copilot-hover: var(--omnix-chat-hover, #293b54);
+  --copilot-menu: var(--omnix-chat-menu-bg, #232a34);
+  --copilot-user-bg: #223a54;
+  --copilot-user-line: #3e5a7c;
+  --copilot-user-text: var(--copilot-text);
+}
+
+html[data-dsh-embedded] body,
+html[data-dsh-embedded] body[data-ds-dark-theme] {
+  --dsw-font-family: var(--omnix-chat-font, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif) !important;
+  --dsh-content-font-size: var(--omnix-chat-font-size, 14px) !important;
+  --dsw-alias-bg-base: var(--copilot-bg) !important;
+  --dsw-alias-bg-module: var(--copilot-panel) !important;
+  --dsw-alias-label-primary: var(--copilot-text) !important;
+  --dsw-alias-label-secondary: var(--copilot-muted) !important;
+  --dsw-alias-label-tertiary: var(--copilot-muted) !important;
+  --dsw-alias-label-caption: var(--copilot-muted) !important;
+  --dsw-alias-border-l2: var(--copilot-line) !important;
+  --dsw-alias-border-l3: var(--copilot-line-strong) !important;
+  --dsw-alias-border-inverted: var(--copilot-line) !important;
+  --dsw-alias-state-business-primary: var(--copilot-accent) !important;
+  --dsw-alias-interactive-bg-hover: var(--copilot-hover) !important;
+  --dsw-alias-interactive-bg-hover-solid: var(--copilot-hover) !important;
+  --dsw-specific-menu: var(--copilot-menu) !important;
+  --dsw-specific-input-major: var(--copilot-panel) !important;
+  background: var(--copilot-bg);
+  color: var(--copilot-text);
+  font-family: var(--dsw-font-family);
+  font-size: var(--dsh-content-font-size);
+}
