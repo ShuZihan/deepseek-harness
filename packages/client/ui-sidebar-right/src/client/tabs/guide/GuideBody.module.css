@@ -123,6 +123,10 @@
 /* The More card keeps the capsule width inside the menu's anchor wrapper. */
 .moreAnchor { display: flex; width: 380px; max-width: 100%; }
 
+:global(html[data-dsh-embedded][data-dsh-compact-chat]) .moreAnchor {
+  display: none;
+}
+
 .moreAnchor .entry[aria-expanded='true'] { background: var(--dsw-alias-interactive-bg-hover); }
 
 .moreMenu { width: max-content; max-width: min(480px, calc(100vw - 24px)); }
