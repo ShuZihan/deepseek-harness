@@ -221,6 +221,28 @@
   display: none;
 }
 
+:global(html[data-dsh-embedded][data-dsh-compact-chat]) .header {
+  min-height: 0;
+  padding-block: 0;
+  padding-inline-end: 16px;
+}
+
+:global(html[data-dsh-embedded][data-dsh-compact-chat]) .titleRow {
+  min-height: var(--dsh-embedded-toolbar-height);
+  padding-inline: 0 var(--dsh-embedded-toolbar-inline-reserve);
+}
+
+:global(html[data-dsh-embedded][data-dsh-compact-chat]) .crumbCurrent {
+  padding-inline-start: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:global(html[data-dsh-embedded][data-dsh-compact-chat]) :is(.tabs, .headerMenuButton),
+:global(html[data-dsh-embedded][data-dsh-compact-chat]) .headerUtilities:not(:has(> :not(.headerMenuButton))) {
+  display: none;
+}
+
 /* The tab row sits above the header paint so the active bar covers its rule. */
 .tabs {
   grid-column: 1 / -1;

@@ -40,23 +40,41 @@
    actions row on hover or focus-within. Opacity keeps layout stable, and
    devices without hover keep every row visible. */
 @media (hover: hover) {
-  [data-actions-reveal='hover'] .actions,
-  :is([data-chat-flow-kind='user'], [data-chat-flow-kind='steering']):has(
+  :global(html:not([data-dsh-embedded][data-dsh-compact-chat])) [data-actions-reveal='hover'] .actions,
+  :global(html:not([data-dsh-embedded][data-dsh-compact-chat])) :is([data-chat-flow-kind='user'], [data-chat-flow-kind='steering']):has(
     ~ :is([data-chat-flow-kind='user'], [data-chat-flow-kind='steering'])
   ) .actions {
     opacity: 0;
     transition: opacity 80ms ease;
   }
 
-  [data-actions-reveal='hover']:hover .actions,
-  [data-actions-reveal='hover']:focus-within .actions,
-  :is([data-chat-flow-kind='user'], [data-chat-flow-kind='steering']):has(
+  :global(html:not([data-dsh-embedded][data-dsh-compact-chat])) [data-actions-reveal='hover']:hover .actions,
+  :global(html:not([data-dsh-embedded][data-dsh-compact-chat])) [data-actions-reveal='hover']:focus-within .actions,
+  :global(html:not([data-dsh-embedded][data-dsh-compact-chat])) :is([data-chat-flow-kind='user'], [data-chat-flow-kind='steering']):has(
     ~ :is([data-chat-flow-kind='user'], [data-chat-flow-kind='steering'])
   ):hover .actions,
-  :is([data-chat-flow-kind='user'], [data-chat-flow-kind='steering']):has(
+  :global(html:not([data-dsh-embedded][data-dsh-compact-chat])) :is([data-chat-flow-kind='user'], [data-chat-flow-kind='steering']):has(
     ~ :is([data-chat-flow-kind='user'], [data-chat-flow-kind='steering'])
   ):focus-within .actions {
     opacity: 1;
+  }
+}
+
+:global(html[data-dsh-embedded][data-dsh-compact-chat]) .actions {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 80ms ease;
+}
+
+:global(html[data-dsh-embedded][data-dsh-compact-chat] [data-message-actions-open]) .actions,
+:global(html[data-dsh-embedded][data-dsh-compact-chat]) .actions:has(:focus-visible) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(html[data-dsh-embedded][data-dsh-compact-chat]) .actions {
+    transition: none;
   }
 }
 
@@ -74,7 +92,7 @@
   cursor: pointer;
 }
 
-:global(html[data-dsh-embedded]) .copy {
+:global(html[data-dsh-embedded]:not([data-dsh-compact-chat])) .copy {
   display: none;
 }
 

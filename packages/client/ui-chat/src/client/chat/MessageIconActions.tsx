@@ -50,7 +50,7 @@ export function MessageIconActions({
   const reasonId = useId()
   const { copied, onCopy } = useClipboardCopy(text)
   const clockEl = time === undefined ? null : (
-    <span className={clock === 'start' ? css.timeStart : css.timeEnd}>
+    <span className={clock === 'start' ? css.timeStart : css.timeEnd} data-message-time="">
       {formatMessageClock(time, t, day)}
     </span>
   )

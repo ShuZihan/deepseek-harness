@@ -478,6 +478,8 @@ export interface ConversationInjected {
 
 /** Business callbacks injected into the strict Session body. */
 export interface ConversationSessionInjected {
+  /** Resolve to Chat while the embedded tab strip is hidden. */
+  readonly compactChat?: boolean
   /** Package-owned View roster source bound only for the Conversation body. */
   readonly hooks: {
     readonly conversationViews: ObservableSnapshot<readonly ViewTab[]>
@@ -522,6 +524,8 @@ export interface ConversationViewActionsOwnerProps {
 
 /** Business callbacks injected into the strict Session header. */
 export interface ConversationSessionHeaderInjected {
+  /** Resolve to Chat while the embedded tab strip is hidden. */
+  readonly compactChat?: boolean
   /** Open the clicked title's actions. */
   /** Package-owned View roster source bound only for the Conversation header. */
   readonly hooks: {

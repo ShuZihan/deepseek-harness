@@ -448,6 +448,44 @@ describe('Conversation inject API', () => {
     await b.runtime.dispose()
   })
 
+  it('opens an embedded compact Session in Chat while retaining its registered and saved Views', async () => {
+    const root = document.documentElement
+    const preferenceKey = `dsh.conversation.${ROOT}`
+    const preference = JSON.stringify({ draft: '', view: 'trajectory', viewRequest: null })
+    root.setAttribute('data-dsh-embedded', '')
+    root.setAttribute('data-dsh-compact-chat', '')
+    localStorage.setItem(preferenceKey, preference)
+    onTestFinished(() => {
+      root.removeAttribute('data-dsh-embedded')
+      root.removeAttribute('data-dsh-compact-chat')
+      localStorage.removeItem(preferenceKey)
+    })
+    const b = await bench()
+    onTestFinished(() => b.runtime.dispose())
+    const binding = b.runtime.ctx.uiConversation.binding(ROOT)
+    const activate = vi.spyOn(binding, 'activate')
+    b.runtime.ctx.uiConversation.views.register({
+      target: 'trajectory',
+      toolCallFocus: callId => `tool:${callId}`,
+      create: () => ({ empty: null, replace: () => null, apply: () => null }),
+    })
+    const removeChat = b.slots.register({ name: 'conversation.view', id: 'chat' }, () => null)
+    const removeTrajectory = b.slots.register({ name: 'conversation.view', id: 'trajectory' }, () => null)
+    onTestFinished(() => { removeTrajectory(); removeChat() })
+    await b.runtime.flush()
+
+    b.runtime.ctx.uiSession.adapter.bindingSource(b.rootReference).getSnapshot()
+    expect(activate).toHaveBeenLastCalledWith('chat')
+    expect(b.viewSource(ROOT).getSnapshot().map(view => view.id)).toEqual(['chat', 'trajectory'])
+    expect(b.conversationApi(ROOT).injected.hooks.inspectCall.getSnapshot()).toBeUndefined()
+
+    activate.mockClear()
+    b.conversationApi(ROOT).injected.openView('trajectory', 'call-1')
+    b.headerApi(ROOT).injected.selectView('trajectory')
+    expect(activate).not.toHaveBeenCalled()
+    expect(localStorage.getItem(preferenceKey)).toBe(preference)
+  })
+
   it('restores the selected View when a cached Session becomes Provider-bound', async () => {
     const b = await bench()
     const binding = b.runtime.ctx.uiConversation.binding(ROOT)

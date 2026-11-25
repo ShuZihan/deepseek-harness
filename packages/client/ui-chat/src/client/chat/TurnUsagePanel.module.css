@@ -6,6 +6,10 @@
   min-width: 0;
 }
 
+:global(html[data-dsh-embedded][data-dsh-compact-chat]) .root {
+  display: none;
+}
+
 /* Adjacent stat pills (usage then time) rebate part of their combined internal
    padding so the pair reads as one cluster inside the row's 8px flex gap,
    while keeping 2px clear between their hover backgrounds. */

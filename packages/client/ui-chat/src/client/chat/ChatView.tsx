@@ -19,6 +19,7 @@ import { TurnNavigator } from './TurnNavigator.tsx'
 import { mergeTurnRailItems } from './turn-rail-items.ts'
 import { useTextInteraction } from './text-interaction.ts'
 import { useChatScroll } from './use-chat-scroll.ts'
+import { useMessageActionReveal } from './use-message-action-reveal.ts'
 import { fileMediaUrl, resolveWorkspacePath, sessionFileAddress } from '@deepseek-ai/dsh-util-workspace-path'
 import css from './ChatView.module.css'
 
@@ -227,9 +228,10 @@ export function ChatView({
   const interactionIds = useInteractionIds(ids => ids)
   const textInteraction = useTextInteraction(scroll.columnRef, interactionSurfaceRef, dispatchInteraction, interactionIds)
   const flowContext = useMemo<ChatFlowHookContext>(() => ({ motion: scroll.motion }), [scroll.motion])
+  const messageActionPointerHandlers = useMessageActionReveal(sessionId)
 
   return (
-    <div className={css.frame}>
+    <div className={css.frame} {...messageActionPointerHandlers}>
       {scroll.initialized && (
         <TurnNavigator
           items={railItems}

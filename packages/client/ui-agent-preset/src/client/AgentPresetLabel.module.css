@@ -21,6 +21,10 @@
   flex: none;
 }
 
+:global(html[data-dsh-embedded][data-dsh-compact-chat]) .label {
+  display: none;
+}
+
 /* First sacrifice when the title row (the enclosing inline-size container)
    runs out of width: the preset is passive chrome, so it yields before any
    interactive header action loses its label. */

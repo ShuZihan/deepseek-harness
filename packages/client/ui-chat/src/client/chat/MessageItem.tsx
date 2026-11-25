@@ -219,6 +219,7 @@ function UserStyleBubble({
   return (
     <div
       className={css.userRow}
+      data-message-action-owner={actions === undefined ? undefined : ''}
       data-pending-steering={pending || undefined}
       data-submission-echo={echo || undefined}
       data-chat-steering-batch={batchStart ? 'start' : undefined}

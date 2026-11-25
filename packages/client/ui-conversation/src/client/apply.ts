@@ -46,7 +46,7 @@ import { ConversationSession, ConversationSessionHeader } from './skeleton/Conve
 import { InputBar } from './skeleton/InputBar.tsx'
 import { todoDockEntry } from './skeleton/TodoPanel.tsx'
 import { installStopShortcut } from './stop-shortcut.ts'
-import { TRAJECTORY_VIEW_ID, resolveActiveView } from './view-selection.ts'
+import { DEFAULT_VIEW_ID, TRAJECTORY_VIEW_ID, resolveActiveView } from './view-selection.ts'
 import { createViewPins } from './view-pins.ts'
 import { en, ja, es, fr, de, ru, pt, NS, zh, type ConversationKey } from './locales.ts'
 import { CONVERSATION_SETTINGS_NAMESPACE, type ConversationSettings } from '../submission-settings.ts'
@@ -160,6 +160,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
   const embedded = embeddedConversationHost()
   const embeddedAppearance = typeof document !== 'undefined'
     && document.documentElement.hasAttribute('data-dsh-embedded')
+  const compactChat = embeddedAppearance && document.documentElement.hasAttribute('data-dsh-compact-chat')
   const sessions = ctx.sessions
   const slots = ctx.slots
   // Schemastery's field default is materialized before Cordis calls apply.
@@ -230,8 +231,9 @@ export function apply(ctx: Context, config: Config = Config({})): void {
     if (active !== undefined) uiConversation.binding(sessionId).activate(active.id)
   }
   const restoreView = (sessionId: SessionId): void => {
-    activateView(sessionId, readConversationViewPreference(sessionId))
+    activateView(sessionId, compactChat ? null : readConversationViewPreference(sessionId))
   }
+  const canOpenView = (view: string): boolean => !compactChat || view === DEFAULT_VIEW_ID
   const conversationViews = createSnapshotStore<readonly ViewTab[]>(viewTabs())
   const viewPins = createViewPins()
   const viewActions = {
@@ -407,12 +409,13 @@ export function apply(ctx: Context, config: Config = Config({})): void {
     store: conversationStore,
     inject: (sessionId: SessionId, actions: BoundActions<typeof conversationStore>): ConversationSessionInjected => {
       const openView = (view: string, focus: string): void => {
-        if (!viewTabs().some(tab => tab.id === view)) return
+        if (!canOpenView(view) || !viewTabs().some(tab => tab.id === view)) return
         activateView(sessionId, view)
         actions.openView(view, focus)
       }
       const inspectionTarget = () => uiConversation.views.entries().find(definition =>
         definition.toolCallFocus !== undefined
+        && canOpenView(definition.target)
         && conversationViews.getSnapshot().some(view => view.id === definition.target),
       )
       const inspectCall = (callId: string): void => {
@@ -420,6 +423,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
         if (target?.toolCallFocus !== undefined) openView(target.target, target.toolCallFocus(callId))
       }
       return {
+        ...(compactChat ? { compactChat } : {}),
         hooks: {
           conversationViews,
           inspectCall: {
@@ -457,10 +461,12 @@ export function apply(ctx: Context, config: Config = Config({})): void {
     },
     store: conversationStore,
     inject: (sessionId: SessionId, actions: BoundActions<typeof conversationStore>): ConversationSessionHeaderInjected => ({
+      ...(compactChat ? { compactChat } : {}),
       hooks: { conversationViews, entryPins: viewPins.unpinned, entryActions: viewActions },
       setPinned: viewPins.setPinned,
       open: (id) => { workspaceNavigation.openSession(id) },
       selectView: (view) => {
+        if (!canOpenView(view)) return
         activateView(sessionId, view)
         actions.setView(view)
       },

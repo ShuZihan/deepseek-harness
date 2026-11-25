@@ -106,13 +106,13 @@ function equalBreadcrumbs(left: readonly Breadcrumb[], right: readonly Breadcrum
  * @returns Session navigation controls, with title and tabs after conversation starts.
  */
 export function ConversationSessionHeader({
-  sessionId, hideChrome, useSessions, useConversationViews, useStore,
+  sessionId, hideChrome, compactChat, useSessions, useConversationViews, useStore,
   renderSlot, renderFactorySlot, open, useContextMenu, selectView, setPinned, t, useEntryPins, useEntryActions,
 }: ConversationSessionHeaderProps) {
   const { getTriggerProps } = useContextMenu()
   const tabs = useConversationViews(value => value)
   const selectedId = useStore(s => s.view)
-  const active = resolveActiveView(tabs, selectedId)
+  const active = resolveActiveView(tabs, compactChat ? null : selectedId)
   const ancestry = useSessions(s => deriveAncestry(s, sessionId), equalBreadcrumbs)
   const unpinned = useEntryPins(ids => ids)
   const hasEntryActions = useEntryActions(registered => registered)

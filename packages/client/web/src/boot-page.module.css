@@ -4,6 +4,11 @@
   --dsh-embedded-toolbar-height: 40px;
 }
 
+:global(html[data-dsh-embedded][data-dsh-compact-chat]) {
+  --dsh-embedded-toolbar-height: 44px;
+  --dsh-embedded-toolbar-inline-reserve: 116px;
+}
+
 :global(html[data-dsh-embedded] [data-dsh-embedded-toolbar]) {
   position: absolute;
   inset: 0 0 auto;

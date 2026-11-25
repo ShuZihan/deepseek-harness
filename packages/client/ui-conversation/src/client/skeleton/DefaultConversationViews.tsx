@@ -11,13 +11,13 @@ import css from './ConversationRoot.module.css'
  * @returns the active view area, or null while the Session remains blank.
  */
 export function DefaultConversationViews({
-  view, useSession, useConversation, useConversationViews, inputActions, useStore, actions,
+  view, compactChat, useSession, useConversation, useConversationViews, inputActions, useStore, actions,
   renderSlot, bindDraftPersistence, openView, useInspectCall,
 }: ConversationSessionSlotProps) {
   const tabs = useConversationViews(value => value)
   const inspectCall = useInspectCall(value => value)
   const selectedId = useStore(s => s.view)
-  const active = resolveActiveView(tabs, selectedId)
+  const active = resolveActiveView(tabs, compactChat ? null : selectedId)
   const session = useSession(s => s)
   const conversation = useConversation(s => s)
   const viewRequest = useStore(s => s.viewRequest ?? null)
