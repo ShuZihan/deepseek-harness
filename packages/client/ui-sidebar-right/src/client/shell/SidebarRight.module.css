@@ -87,6 +87,15 @@
   inset-block-start: var(--dsh-embedded-toolbar-height);
 }
 
+/* A shared toolbar places the host window controls beside the panel controls. */
+:global(html[data-dsh-embedded][data-dsh-compact-chat][data-omnix-workspace-single-toolbar]) .panel[data-sidebar-right-panel='push'] {
+  inset-block-start: 0;
+}
+
+:global(html[data-dsh-embedded][data-dsh-compact-chat][data-omnix-workspace-single-toolbar]) .panel :global([data-dockkit-strip]:has(> [data-dockkit-strip-chrome])) {
+  padding-inline-end: calc(6px + var(--omnix-workspace-window-actions-width, 0px));
+}
+
 :global(html[data-dsh-embedded]) .panel[data-sidebar-right-auto-fullscreen] :global([data-sidebar-right-mode='push']) {
   display: none;
 }

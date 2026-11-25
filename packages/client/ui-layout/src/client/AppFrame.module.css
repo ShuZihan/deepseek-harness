@@ -87,6 +87,10 @@
   padding-block-start: 0;
 }
 
+:global(html[data-dsh-embedded][data-dsh-compact-chat][data-omnix-workspace-single-toolbar]) .centerCol {
+  padding-block-start: var(--dsh-embedded-toolbar-height);
+}
+
 :global(html[data-dsh-embedded]) .frame > :is(.sidebarCol, .handle, .drawerMask, .leadingSeat) {
   display: none;
 }

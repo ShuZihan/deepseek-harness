@@ -238,6 +238,16 @@
   text-overflow: ellipsis;
 }
 
+/* The host toolbar carries the editable title; keep native session actions below it. */
+:global(html[data-dsh-embedded][data-dsh-compact-chat][data-omnix-workspace-single-toolbar]) .titleRow {
+  min-height: 0;
+  padding-inline-end: 0;
+}
+
+:global(html[data-dsh-embedded][data-dsh-compact-chat][data-omnix-workspace-single-toolbar]) .crumbCurrent {
+  display: none;
+}
+
 :global(html[data-dsh-embedded][data-dsh-compact-chat]) :is(.tabs, .headerMenuButton),
 :global(html[data-dsh-embedded][data-dsh-compact-chat]) .headerUtilities:not(:has(> :not(.headerMenuButton))) {
   display: none;
