@@ -32,6 +32,11 @@
   display: none;
 }
 
+/* Embedded statistics are hidden. Preserve the dock for other slot entries. */
+.compactDock:not(:has(> :not([data-composer-stat]))) {
+  display: none;
+}
+
 .hero {
   /* No bottom pad in the centered hero, but the side clearance must survive:
      the hero wrapper is full-width on narrow viewports, so this padding is
@@ -465,6 +470,7 @@
 }
 
 .standardControls { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.standardControls:has(> [data-context-meter-inline]) { gap: 4px; }
 .tools[hidden], .standardControls[hidden] { display: none; }
 .trailingActive { flex: 1; margin-left: 0; }
 .activity { display: flex; align-items: center; flex: none; }

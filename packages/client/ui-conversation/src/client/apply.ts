@@ -492,6 +492,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
       if (sessionId === undefined) {
         return {
           embeddedAppearance,
+          compactChat,
           registerFileIntake: fileIntake,
           inlineImageTypes: embedded?.inlineImageTypes,
           keyboard: undefined,
@@ -518,6 +519,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
       const bridge = hostPathBridge()
       return {
         embeddedAppearance,
+        compactChat,
         registerFileIntake: fileIntake,
         inlineImageTypes: embedded?.inlineImageTypes,
         keyboard: shell,

@@ -98,6 +98,7 @@ interface BenchOptions {
   variant?: 'hero' | 'composer'
   occurrence?: 'main' | 'embedded'
   embeddedAppearance?: boolean
+  compactChat?: boolean
   registerFileIntake?: ComposerFileIntake
   placeholder?: string
   t?: InputBarProps['t']
@@ -237,6 +238,7 @@ function bench(over?: BenchOptions) {
     variant: over?.variant ?? 'composer',
     occurrence: over?.occurrence ?? 'main',
     embeddedAppearance: over?.embeddedAppearance ?? false,
+    compactChat: over?.compactChat ?? false,
     ...(over?.inert === true ? { disabled: true } : {}),
     ...(over?.blocked !== undefined ? { blocked: over.blocked } : {}),
     ...(over?.workspacePickerOpen !== undefined ? { workspacePickerOpen: over.workspacePickerOpen } : {}),
@@ -2265,4 +2267,25 @@ it('places context usage below the composer and hides it until the activity clos
   fireEvent.click(view.getByRole('button', { name: '上下文已用 25%' }))
   expect(view.getByRole('dialog', { name: '上下文已用' })).toBeTruthy()
   expect(view.getByRole('button', { name: '发送消息' })).toBeTruthy()
+})
+
+it('places one icon-only context meter before the model in the compact composer', () => {
+  const { view } = bench({
+    compactChat: true,
+    modelEntry: <button>model choice</button>,
+    contextPressure: { pressureTokens: 32_000, contextWindow: 128_000 },
+    activityEntry: owner => <button onClick={() => { owner.onActiveChange(true) }}>expand activity</button>,
+    footer: <span>Extension reading</span>,
+  })
+  const meter = view.getByRole('button', { name: '上下文已用 25%' })
+  const model = view.getByRole('button', { name: 'model choice' })
+  expect(meter.closest('[data-context-meter-inline]')?.nextElementSibling).toBe(model)
+  expect(meter.textContent).toBe('')
+  expect(view.getByText('Extension reading').closest('[data-composer-dock]')).not.toBeNull()
+
+  fireEvent.click(meter)
+  expect(view.getByRole('dialog', { name: '上下文已用' }).textContent).toContain('~32K / 128K')
+  fireEvent.click(view.getByRole('button', { name: 'expand activity' }))
+  expect(view.queryByRole('dialog', { name: '上下文已用' })).toBeNull()
+  expect(view.queryByRole('button', { name: '上下文已用 25%' })).toBeNull()
 })

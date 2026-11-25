@@ -1,4 +1,4 @@
-/** Composer context-occupancy meter: a ring and percentage below the card fed by the
+/** Composer context-occupancy meter: a ring with an optional visible percentage fed by the
  * `contextPressure` projection, with a click-open panel of the heuristic
  * `contextBreakdown` composition (system prompt, tools, conversation).
  * Renders nothing until a provider reports both pressure and a route
@@ -49,11 +49,13 @@ function formatTokens(value: number, t: ComposerBarProps['t']): string {
 
 export interface ContextMeterProps {
   useProjection: UseProjection
+  /** Inline meters show the reading in their tooltip and dialog. */
+  iconOnly?: boolean
   /** The owning bar's locale seat, passed down as a plain prop. */
   t: ComposerBarProps['t']
 }
 
-export function ContextMeter({ useProjection, t }: ContextMeterProps) {
+export function ContextMeter({ useProjection, iconOnly = false, t }: ContextMeterProps) {
   const pressure = useProjection('contextPressure')
   const breakdown = useProjection('contextBreakdown')
   const [open, setOpen] = useState(false)
@@ -99,7 +101,7 @@ export function ContextMeter({ useProjection, t }: ContextMeterProps) {
   const segments = parts.filter(part => part.width > 0)
 
   return (
-    <span ref={rootRef} style={{ anchorName }} className={css.root}>
+    <span ref={rootRef} style={{ anchorName }} className={css.root} data-context-meter-inline={iconOnly || undefined}>
       <Tooltip label={t('context.aria', { percent: reading })} side="top" delayMs={200} disabled={open} portal>
         <button
           type="button"
@@ -120,7 +122,7 @@ export function ContextMeter({ useProjection, t }: ContextMeterProps) {
               transform="rotate(-90 7 7)"
             />
           </svg>
-          <span>{reading}</span>
+          {iconOnly ? null : <span>{reading}</span>}
         </button>
       </Tooltip>
       {open && createPortal(

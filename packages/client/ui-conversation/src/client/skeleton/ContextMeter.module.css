@@ -1,4 +1,4 @@
-/* Context-occupancy control below the composer plus its click-open breakdown
+/* Context-occupancy control plus its click-open breakdown
    panel (menu surface: elevation-prominent). */
 
 .root {
@@ -27,6 +27,18 @@
 .trigger[aria-expanded='true'] {
   background: var(--dsw-alias-interactive-bg-hover);
   color: var(--dsw-alias-label-secondary);
+}
+
+.root[data-context-meter-inline] .trigger {
+  justify-content: center;
+  inline-size: 24px;
+  block-size: 28px;
+  padding: 0;
+}
+
+.root[data-context-meter-inline] .trigger svg {
+  inline-size: 12px;
+  block-size: 12px;
 }
 
 @media (hover: hover) {

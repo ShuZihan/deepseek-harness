@@ -51,7 +51,7 @@ export const InputBar = memo(function InputBar({
   useAccess,
   useProjection, sessionId, variant, occurrence, disabled: inert = false, blocked,
   workspacePickerOpen = false, onRequestWorkspace,
-  placeholder, accessory, embeddedAppearance, inlineImageTypes,
+  placeholder, accessory, embeddedAppearance, compactChat, inlineImageTypes,
 }: InputBarProps) {
   const input = useInput(s => s)
   const notice = useNotices(s => s)
@@ -543,6 +543,7 @@ export const InputBar = memo(function InputBar({
               {input === undefined || sessionId === undefined
                 ? null
                 : renderSlot('conversation.input.right', {})}
+              {compactChat && !activity && <ContextMeter useProjection={useProjection} iconOnly t={t} />}
               {sessionId === undefined ? null : renderSlot('conversation.input.model', { locked: modelSeatLocked })}
             </div>
             {input === undefined || sessionId === undefined ? null : <div className={activity ? css.activityExpanded : css.activity}>
@@ -600,11 +601,11 @@ export const InputBar = memo(function InputBar({
           </div>
         </div>
       </div>
-      <div className={css.dock} data-composer-dock>
+      <div className={clsx(css.dock, compactChat && css.compactDock)} data-composer-dock>
         {variant === 'composer' && input !== undefined && sessionId !== undefined
           ? renderSlot('conversation.composer.dock', {})
           : null}
-        {activity ? null : <ContextMeter useProjection={useProjection} t={t} />}
+        {!compactChat && !activity && <ContextMeter useProjection={useProjection} t={t} />}
       </div>
     </div>
   )

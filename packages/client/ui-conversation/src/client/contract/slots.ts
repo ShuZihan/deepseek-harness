@@ -593,6 +593,8 @@ export type ComposerFileIntake = (target: ComposerFileIntakeTarget) => () => voi
 export interface ComposerBarInjected {
   /** Whether the browser shell uses the embedded appearance. */
   embeddedAppearance?: boolean
+  /** Use the compact layout of the host's Workspace Chat. */
+  compactChat?: boolean
   /** Document paste routing across mounted composers. */
   registerFileIntake: ComposerFileIntake
   /** If set, the embedding Host accepts only these inline image formats. */
