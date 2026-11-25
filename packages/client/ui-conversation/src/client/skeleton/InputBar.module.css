@@ -549,7 +549,8 @@
   width: 20px;
   height: 20px;
   background: currentColor;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20.9 2.7a.9.9 0 0 1 1.1 1.1l-5.7 17.1a.9.9 0 0 1-1.7.1l-3.1-7-7-3.1a.9.9 0 0 1 .1-1.7l16.3-6.5ZM8 10.2l4.2 1.9 5.5-5.3L8 10.2Zm5.3 3 1.9 4.2 3.4-9.7-5.3 5.5Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  /* Center the paper plane's painted bounds within its viewBox. */
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='1 0 24 24'%3E%3Cpath d='M20.9 2.7a.9.9 0 0 1 1.1 1.1l-5.7 17.1a.9.9 0 0 1-1.7.1l-3.1-7-7-3.1a.9.9 0 0 1 .1-1.7l16.3-6.5ZM8 10.2l4.2 1.9 5.5-5.3L8 10.2Zm5.3 3 1.9 4.2 3.4-9.7-5.3 5.5Z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 @media (hover: hover) {
